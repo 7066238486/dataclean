@@ -1,0 +1,12 @@
+import sys
+import os
+import findspark
+findspark.init()
+os.environ["JAVA_HOME"]="/usr/lib/jvm/java"
+os.environ["SPARK_HOME"]="/usr/lib/spark"
+from pyspark.sql import *
+from pyspark.sql.functions import *
+import re
+
+spark = SparkSession.builder.master("local[*]").appName("test").getOrCreate()
+spark.sparkContext.setLogLevel("ERROR")
