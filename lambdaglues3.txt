@@ -1,0 +1,29 @@
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+from pyspark.sql import SparkSession
+spark = SparkSession.builder.getOrCreate()
+args = getResolvedOptions(sys.argv, ["file","buck"])
+file_name=args['file']
+bucket_name=args['buck']
+print("Bucket Name" , bucket_name)
+print("File Name" , file_name)
+input_file_path="s3a://{}/{}".format(bucket_name,file_name)
+output="s3a://{}/{}".format(bucket_name,"/output/aslres")
+print("Input File Path : ",input_file_path);
+
+df = spark.read.format("csv").option("header", True).option("inferSchema", False).load(input_file_path)
+res = df.where(col("age")>30)
+#res.repartition(1).write.mode("append").format("csv").option("header", "true").save(output)
+host="jdbc:mysql://rushikesh.czcemaajrvs2.ap-south-1.rds.amazonaws.com:3306/mysqldb"
+res.write.mode("append").format("jdbc").option("url",host).option("user","myuser")\
+   .option("password","mypassword").option("dbtable","asl")\
+    .option("driver","com.mysql.jdbc.Driver").save()
+
+
+
