@@ -1,0 +1,16 @@
+from pyspark.sql import *
+from pyspark.sql.functions import *
+
+spark = SparkSession.builder.master("local[*]").appName("test").getOrCreate()
+sc = spark.sparkContext
+data="C:\\bigdata\\datasets\\zips.json"
+df=spark.read.format('json').options(header='true',inferSchema='true').load(data)
+ndf=df.withColumnRenamed('_id','id').withColumn('longitude',col('loc')[0])\
+    .withColumn('latitude',col('loc')[1]).drop('loc')
+#ndf=df.withColumnRenamed("_id","id").withColumn("loc", explode(col("loc")))
+op="C:\\bigdata\\datasets\\output\\jsondata"
+ndf.write.mode('append').format('csv').option('header','true').save(op)
+
+
+ndf.show(truncate=False)
+ndf.printSchema()
