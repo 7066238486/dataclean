@@ -1,0 +1,42 @@
+from pyspark.sql import *
+from pyspark.sql.functions import *
+
+spark = SparkSession.builder.master("local[*]").appName("test").getOrCreate()
+sc = spark.sparkContext
+'''
+# You might need to set these
+sc._jsc.hadoopConfiguration().set("fs.s3n.awsAccessKeyId", "<AWS_KEY>")
+sc._jsc.hadoopConfiguration().set("fs.s3n.awsSecretAccessKey", "<AWS_SECRET>")
+
+# Set options below
+sfOptions = {
+  "sfURL" : "tw54823.ap-southeast-1.snowflakecomputing.com",
+  "sfUser" : "RUSHIKESH",
+  "sfPassword" : "Rushikesh123",
+  "sfDatabase" : "SNOWFLAKE_SAMPLE_DATA",
+  "sfSchema" : "TPCH_SF10",
+  "sfWarehouse" : "SMALLWH"
+}
+
+SNOWFLAKE_SOURCE_NAME = "net.snowflake.spark.snowflake"
+
+df = spark.read.format(SNOWFLAKE_SOURCE_NAME) \
+  .options(**sfOptions) \
+  .option("query",  "select * from customer") \
+  .load()
+
+df.show()
+'''
+#--OORRRR----
+
+df=spark.read.format("net.snowflake.spark.snowflake")\
+  .option("sfURL","tw54823.ap-southeast-1.snowflakecomputing.com")\
+  .option("sfUser","RUSHIKESH")\
+  .option("sfPassword","Rushikesh123")\
+  .option("sfDatabase","SNOWFLAKE_SAMPLE_DATA")\
+  .option("sfSchema","TPCH_SF1")\
+  .option("sfWarehouse","SMALLWH")\
+  .option("query",  "select * from supplier")\
+  .load()
+
+df.show()
