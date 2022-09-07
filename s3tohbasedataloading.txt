@@ -1,0 +1,34 @@
+import sys
+import os
+import findspark
+findspark.init()
+os.environ["JAVA_HOME"]="/usr/lib/jvm/java"
+os.environ["SPARK_HOME"]="/usr/lib/spark"
+from pyspark.sql import *
+from pyspark.sql.functions import *
+import re
+
+#sc = spark.sparkContext
+spark = SparkSession.builder.master("local").appName("test").getOrCreate()
+data="s3://inupt/maldata/us-500.csv"
+#tab=sys.argv[2]
+df=spark.read.format("csv").option("header","true").option("sep",",").option("inferSchema","true").load(data)
+#tab=sys.argv[1]
+#df=spark.read.format("org.apache.phoenix.spark").option("table","emp" ).option("zkUrl", "localhost:2181").load()
+
+#df1=spark.read.format("org.apache.phoenix.spark").option("table","dept" ).option("zkUrl", "localhost:2181").load()
+#ndf=df.select(*(upper(col(c).alias(c) for c in df.columns))
+#ndf = df.toDF(*(upper(col(c).alias(c) for c in df.columns)))
+#df.show()
+#df1.show()
+#ndf=df.toDF("FIRST_NAME","LAST_NAME","COMPANY_NAME","ADDRESS","CITY","COUNTY","STATE","ZIP","PHONE1","PHONE2","EMAIL","WEB")
+ndf = df.toDF(*[re.sub('[^a-zA-Z0-9]', '', x.upper()) for x in df.columns])
+
+#join=df.join(df1,df.FNAME==df1.NAME,"left").drop("NAME","SAL").na.fill(0)
+#join.write.mode("overwrite").format("org.apache.phoenix.spark").option("table","jointab" ).option("zkUrl", "localhost:2181").save()
+
+#join.show()
+#nddf1=spark.read.format("org.apache.phoenix.spark").option("table","dept" ).option("zkUrl", "localhost:2181").load()
+ndf.write.mode("overwrite").format("org.apache.phoenix.spark").option("table","usdata").option("zkUrl", "localhost:2181").save()
+
+ndf.show()
