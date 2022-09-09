@@ -1,0 +1,28 @@
+import json
+import boto3
+import io
+import pandas as pd
+import s3fs
+import fsspec
+import csv
+
+def lambda_handler(event, context):
+    # TODO implement
+    print(1)
+    s3 = boto3.client('s3')
+    
+    #obj = s3.get_object(Bucket='anurag2025',Key='data/info.txt')
+    #df=pd.read_csv(io.BytesIO(obj['Body'].read()))
+    
+    df=pd.read_csv('s3://inupt/maldata/us-500.csv')
+    print(df)
+    
+    #bucket=s3.Bucket('anurag2025')
+    #with open('s3://anurag2025/data/', 'r') as file:
+    #    my_reader = csv.reader(file, delimiter=',')
+    #    for row in my_reader:
+    #        print(row)
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Lambda!')
+    }
