@@ -1,0 +1,74 @@
+from pyspark.sql import *
+from pyspark.sql.functions import *
+from pyspark.streaming import *
+spark = SparkSession.builder.master("local[2]").appName("test").getOrCreate()
+ssc = StreamingContext(spark.sparkContext, 10)
+spark.sparkContext.setLogLevel("ERROR")
+host="ec2-43-204-108-188.ap-south-1.compute.amazonaws.com"
+dso = ssc.socketTextStream(host, 2222)
+#lines.pprint()
+def getSparkSessionInstance(sparkConf):
+    if ("sparkSessionSingletonInstance" not in globals()):
+        globals()["sparkSessionSingletonInstance"] = SparkSession \
+            .builder \
+            .config(conf=sparkConf) \
+            .getOrCreate()
+    return globals()["sparkSessionSingletonInstance"]
+
+
+def process(time, rdd):
+    print("========= %s =========" % str(time))
+    try:
+        spark = getSparkSessionInstance(rdd.context.getConf())
+        cols=["name","age","sal"]
+        df = rdd.map(lambda x:x.split(",")).toDF(cols)
+        df.show()
+
+    except:
+        pass
+
+dso.foreachRDD(process)
+ssc.start()             # Start the computation
+ssc.awaitTermination()
+
+
+------------------------------------------------------------------------------------------------------------
+
+
+from pyspark.sql import *
+from pyspark.sql.functions import *
+from pyspark.streaming import *
+spark = SparkSession.builder.master("local[2]").appName("test").getOrCreate()
+ssc = StreamingContext(spark.sparkContext, 10)
+spark.sparkContext.setLogLevel("ERROR")
+host="ec2-43-204-108-188.ap-south-1.compute.amazonaws.com"
+dso = ssc.socketTextStream(host, 2222)
+#lines.pprint()
+def getSparkSessionInstance(sparkConf):
+    if ("sparkSessionSingletonInstance" not in globals()):
+        globals()["sparkSessionSingletonInstance"] = SparkSession \
+            .builder \
+            .config(conf=sparkConf) \
+            .getOrCreate()
+    return globals()["sparkSessionSingletonInstance"]
+
+
+def process(time, rdd):
+    print("========= %s =========" % str(time))
+    try:
+        spark = getSparkSessionInstance(rdd.context.getConf())
+        cols=["name","age","sal"]
+        df = rdd.map(lambda x:x.split(",")).toDF(cols)
+        df.show()
+        host="jdbc:mysql://rushikesh.czcemaajrvs2.ap-south-1.rds.amazonaws.com:3306/mysqldb?useSSL=false"
+        df.write.mode("append").format("jdbc").option("url", host).option("user","myuser") \
+        .option("password","mypassword").option("dbtable","streaming")\
+        .option("driver","com.mysql.jdbc.Driver").save()
+
+
+    except:
+        pass
+
+dso.foreachRDD(process)
+ssc.start()             # Start the computation
+ssc.awaitTermination()
