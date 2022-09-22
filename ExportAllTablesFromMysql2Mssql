@@ -1,0 +1,36 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import *
+
+spark = SparkSession.builder.master("local[*]").appName("test").getOrCreate()
+sc = spark.sparkContext
+
+alltabs="(select table_name from information_schema.tables where table_schema='mysqldb')t"
+
+host="jdbc:mysql://rushikesh.czcemaajrvs2.ap-south-1.rds.amazonaws.com:3306/mysqldb?useSSL=false"
+
+msdf=spark.read.format("jdbc").option("url",host)\
+    .option('user','myuser').option('password','mypassword')\
+    .option('dbtable',alltabs)\
+    .option("driver","com.mysql.jdbc.Driver").load()
+#msdf.show()
+
+tabs=[x[0] for x in msdf.collect()]       # list of tables
+
+# Read tables from mysql database
+
+host="jdbc:mysql://rushikesh.czcemaajrvs2.ap-south-1.rds.amazonaws.com:3306/mysqldb?useSSL=false"
+for i in tabs:    # extract table one by one
+    df=spark.read.format("jdbc").option("url",host)\
+    .option('user', 'myuser').option('password', 'mypassword')\
+    .option('dbtable', i ) \
+    .option("driver", "com.mysql.jdbc.Driver").load()
+
+#   Write/store into mssql database
+
+mshost=" "   # put mssql url here
+
+df.write.format("jdbc").option("url",mshost)\
+    .option('user', 'msuser').option('password', 'mspassword') \
+    .option('dbtable', i ) \
+    .option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver")\
+    .save()
