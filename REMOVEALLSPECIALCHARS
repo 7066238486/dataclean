@@ -18,3 +18,23 @@ ndf.show()
 print("no of null values are :",ndf.count())
 # ndf.show(ndf.count(),False)
 ndf.printSchema()
+
+
+------------------------------------------------------------------------------------------------------
+
+# adhar masking UDF
+def mask(num):
+    msk=re.sub(r"[0-9]{8}",'########',num)
+    return msk
+masking=udf(mask)
+
+# adhar masking udf  --------------
+data='C:\\Users\\Dell\\Downloads\\adhar1.csv'
+df=spark.read.format('csv').option('header','true').load(data) # .option('inferSchema','true')
+# Adhar masking with SQL
+df.createOrReplaceTempView('emp')
+ndf=spark.sql('select adhar_no,replace(adhar_no,substr(adhar_no,1,8),"########") as mask_adhar from emp')
+# Adhar masking with spark
+# ndf=df.withColumn('mask_adhar',masking('adhar_no'))
+ndf.show()
+ndf.printSchema()
