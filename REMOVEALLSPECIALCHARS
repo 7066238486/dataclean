@@ -8,8 +8,7 @@ data="C:\\bigdata\\BankReviews.csv"
 df=spark.read.format('csv').option('header','true').option('inferSchema','true').load(data)
 df1=df.withColumn('Date',to_date(df.Date,'d-M-yyyy'))
 df2=df1.select([col(x).alias(x.lower()) for x in df1.columns])
-df3 = df2.withColumn('replace_reviews',regexp_replace\
-    ("reviews", "[^a-zA-Z ]+", "")).drop("reviews")\
+df3 = df2.withColumn('replace_reviews',regexp_replace("reviews", "[^a-zA-Z ]+", "")).drop("reviews")\
     .na.fill("no review",["replace_reviews"]).withColumn("reviews_replaced",lower(col("replace_reviews")))\
     .withColumn("stars",lower(col("stars")))\
     .withColumn("bankname",lower(col("bankname")))\
